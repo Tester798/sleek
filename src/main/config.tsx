@@ -60,7 +60,7 @@ const config: Store<Settings> = new Store<Settings>({
       store.set('showCompleted', true);
       store.set('showHidden', false);
       store.set('windowMaximized', false);
-      store.set('fileSorting', false);
+      store.set('fileSorting', true);
       store.set('convertRelativeToAbsoluteDates', true);
       store.set('thresholdDateInTheFuture', true);
       store.set('colorTheme', 'system');
@@ -75,6 +75,7 @@ const config: Store<Settings> = new Store<Settings>({
       store.set('multilineTextField', false);
       store.set('useMultilineForBulkTodoCreation', false);
       store.set('matomo', true);
+      store.set('isOnTop', false);      
     },
     '2.0.1': store => {
       console.log('Migrating from 2.0.0 → 2.0.1');
