@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, RefObject, memo } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import PushPinIcon from '@mui/icons-material/PushPin';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import './Header.scss';
 
 const { ipcRenderer } = window.api;
@@ -38,6 +39,11 @@ const HeaderComponent: React.FC<Props> = memo(({
 
   return (settings.showFileTabs &&
     <div id='ToolBar'>
+      {settings.files?.length > 0 && (
+        <RestartAltIcon 
+          onClick={() => ipcRenderer.send('uncheckAllTodos')}
+        />
+      )}
       <SearchIcon 
         onClick={() => store.setConfig('isSearchOpen', !settings.isSearchOpen)}
         className={settings.isSearchOpen ? 'active' : ''}

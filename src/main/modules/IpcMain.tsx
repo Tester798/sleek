@@ -1,3 +1,4 @@
+import fs from 'fs/promises';
 import { shell } from 'electron';
 import { ipcMain, app, IpcMainEvent, clipboard } from 'electron';
 import { processDataRequest } from './ProcessDataRequest/ProcessDataRequest';
@@ -5,7 +6,8 @@ import { changeCompleteState } from './ProcessDataRequest/ChangeCompleteState';
 import { writeTodoObjectToFile, removeLineFromFile } from './File/Write';
 import { archiveTodos, handleRequestArchive } from './File/Archive';
 import { config, filter, notifiedTodoObjectsStorage } from '../config';
-import { addFile, setFile, removeFile } from './File/File';
+import { addFile, setFile, removeFile, readFileContent } from './File/File';
+import { getActiveFile } from './File/Active';
 import { openFile, createFile } from './File/Dialog';
 import { createTodoObject } from './ProcessDataRequest/CreateTodoObjects';
 import { setOnTop } from '../main';
@@ -216,6 +218,30 @@ async function processOnTop(event: IpcMainEvent): Promise<void> {
   }
 }
 
+async function uncheckAllTodos(event: IpcMainEvent): Promise<void> {
+  try {
+    const activeFile: FileObject | null = getActiveFile();
+    if(!activeFile) {
+      throw new Error('No active file');
+    }
+    const completeStrings = async (fileContent: string): string => {
+      const arrayOfStrings = fileContent.split('\n');
+      const completedArrayOfStrings = [];
+      for (const str of arrayOfStrings) {
+        completedArrayOfStrings.push(await changeCompleteState(str, false));
+      }
+      return completedArrayOfStrings.join('\n');
+    };
+    const fileContent: string | null = await readFileContent(activeFile.todoFilePath, activeFile.todoFileBookmark);
+    if(fileContent) {
+      await fs.writeFile(activeFile.todoFilePath, await completeStrings(fileContent), 'utf8');
+    }
+  } catch (error: any) {
+    console.error(error);
+    event.reply('responseFromMainProcess', error);
+  }
+}
+
 function removeEventListeners(): void {
   ipcMain.off('storeGetConfig', handleStoreGetConfig);
   ipcMain.off('storeSetConfig', handleStoreSetConfig);
@@ -238,6 +264,7 @@ function removeEventListeners(): void {
   ipcMain.off('removeLineFromFile', handleRemoveLineFromFile);
   ipcMain.off('updateTodoObject', handleUpdateTodoObject);
   ipcMain.off('processOnTop', processOnTop);
+  ipcMain.off('uncheckAllTodos', uncheckAllTodos);
   ipcMain.off('requestArchive', handleRequestArchive);
 }
 
@@ -264,4 +291,5 @@ ipcMain.on('revealInFileManager', handleRevealInFileManager);
 ipcMain.on('removeLineFromFile', handleRemoveLineFromFile);
 ipcMain.on('updateTodoObject', handleUpdateTodoObject);
 ipcMain.on('processOnTop', processOnTop);
+ipcMain.on('uncheckAllTodos', uncheckAllTodos);
 ipcMain.on('requestArchive', handleRequestArchive);
