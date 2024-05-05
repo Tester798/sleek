@@ -22,6 +22,12 @@ const handleCreateWindow = () => {
   }
 }
 
+const setOnTop = async () => {
+  if(!mainWindow) return;
+  config.set('isOnTop', !config.get('isOnTop'));
+  mainWindow.setAlwaysOnTop(config.get('isOnTop'));
+}
+
 const handleClosed = async () => {
   if(watcher) await watcher.close();
   mainWindow = null;
@@ -168,6 +174,8 @@ const createMainWindow = () => {
       }
     });
   }
+
+  if (config.get('isOnTop')) mainWindow?.setAlwaysOnTop(config.get('isOnTop'));
 }
 
 const handleWindowAllClosed = () => {
@@ -205,4 +213,4 @@ app
   .on('activate', handleCreateWindow)
   .on('open-file', () => handleOpenFile(path));
 
-export { mainWindow, handleCreateWindow, eventListeners };
+export { mainWindow, handleCreateWindow, eventListeners, setOnTop };

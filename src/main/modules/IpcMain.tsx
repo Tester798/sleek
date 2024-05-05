@@ -8,6 +8,7 @@ import { config, filter, notifiedTodoObjectsStorage } from '../config';
 import { addFile, setFile, removeFile } from './File/File';
 import { openFile, createFile } from './File/Dialog';
 import { createTodoObject } from './ProcessDataRequest/CreateTodoObjects';
+import { setOnTop } from '../main';
 
 async function handleDataRequest(event: IpcMainEvent, searchString: string): Promise<void> {
   try {
@@ -206,6 +207,15 @@ async function handleOpenInBrowser(event: IpcMainEvent, url: string): Promise<vo
   }
 }
 
+async function processOnTop(event: IpcMainEvent): Promise<void> {
+  try {
+    await setOnTop();
+  } catch (error: any) {
+    console.error(error);
+    event.reply('responseFromMainProcess', error);
+  }
+}
+
 function removeEventListeners(): void {
   ipcMain.off('storeGetConfig', handleStoreGetConfig);
   ipcMain.off('storeSetConfig', handleStoreSetConfig);
@@ -227,6 +237,7 @@ function removeEventListeners(): void {
   ipcMain.off('revealInFileManager', handleRevealInFileManager);
   ipcMain.off('removeLineFromFile', handleRemoveLineFromFile);
   ipcMain.off('updateTodoObject', handleUpdateTodoObject);
+  ipcMain.off('processOnTop', processOnTop);
   ipcMain.off('requestArchive', handleRequestArchive);
 }
 
@@ -252,4 +263,5 @@ ipcMain.on('saveToClipboard', handleSaveToClipboard);
 ipcMain.on('revealInFileManager', handleRevealInFileManager);
 ipcMain.on('removeLineFromFile', handleRemoveLineFromFile);
 ipcMain.on('updateTodoObject', handleUpdateTodoObject);
+ipcMain.on('processOnTop', processOnTop);
 ipcMain.on('requestArchive', handleRequestArchive);

@@ -1,6 +1,9 @@
 import React, { useEffect, useCallback, RefObject, memo } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
+import PushPinIcon from '@mui/icons-material/PushPin';
 import './Header.scss';
+
+const { ipcRenderer } = window.api;
 
 interface Props {
   settings: Settings;
@@ -24,10 +27,6 @@ const HeaderComponent: React.FC<Props> = memo(({
     [settings.isSearchOpen, searchFieldRef]
   );
 
-  const handleOnClick = () => {
-    store.setConfig('isSearchOpen', !settings.isSearchOpen);
-  }
-
   useEffect(() => {
     const handleDocumentKeyDown = (event: KeyboardEvent) => handleKeyDown(event);
     document.addEventListener('keydown', handleDocumentKeyDown);
@@ -38,10 +37,15 @@ const HeaderComponent: React.FC<Props> = memo(({
   }, [handleKeyDown]);
 
   return (settings.showFileTabs &&
-    <div id='ToolBar' onClick={handleOnClick}>
+    <div id='ToolBar'>
       <SearchIcon 
+        onClick={() => store.setConfig('isSearchOpen', !settings.isSearchOpen)}
         className={settings.isSearchOpen ? 'active' : ''}
         data-testid={"header-search-icon"}
+      />
+      <PushPinIcon 
+        onClick={() => ipcRenderer.send('processOnTop')}
+        className={'isOnTop' + (settings.isOnTop ? ' active' : '')}
       />
     </div>
   );
